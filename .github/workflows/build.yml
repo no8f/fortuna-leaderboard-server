@@ -1,0 +1,45 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y \
+            libdrogon-dev libtrantor-dev \
+            libjsoncpp-dev \
+            libsqlite3-dev \
+            uuid-dev \
+            zlib1g-dev \
+            libssl-dev \
+            libbrotli-dev \
+            libhiredis-dev \
+            libyaml-cpp-dev \
+            libpq-dev \
+            default-libmysqlclient-dev
+
+      - name: Install CMake 4
+        run: pip install --upgrade cmake
+
+      - name: Configure
+        run: |
+          export PATH="$(python3 -c 'import cmake; print(cmake.CMAKE_BIN_DIR)'):$PATH"
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: |
+          export PATH="$(python3 -c 'import cmake; print(cmake.CMAKE_BIN_DIR)'):$PATH"
+          cmake --build build --parallel
