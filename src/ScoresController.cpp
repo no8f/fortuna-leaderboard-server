@@ -165,6 +165,17 @@ void ScoresController::getIndex(
     callback(resp);
 }
 
+// ── GET /health ───────────────────────────────────────────────────────────────
+
+void ScoresController::getHealth(
+    const HttpRequestPtr & /*req*/,
+    std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    Json::Value body;
+    body["status"] = "ok";
+    callback(jsonResp(200, body));
+}
+
 // ── GET /scores.txt ──────────────────────────────────────────────────────────
 
 void ScoresController::getScoresTxt(
