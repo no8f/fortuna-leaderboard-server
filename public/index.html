@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fortuna Leaderboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #1a1a2e;
+            color: #eee;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #f0c040;
+            text-shadow: 0 0 12px #f0c040aa;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 2rem;
+        }
+        table {
+            width: 100%;
+            max-width: 600px;
+            border-collapse: collapse;
+            background: #16213e;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px #0008;
+        }
+        thead {
+            background: #0f3460;
+        }
+        th, td {
+            padding: 0.75rem 1.25rem;
+            text-align: left;
+        }
+        th {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #aac;
+        }
+        tr:nth-child(even) { background: #1a2a50; }
+        tr:hover { background: #1e3060; }
+        .rank { color: #f0c040; font-weight: bold; width: 2.5rem; }
+        .score { color: #7cf; font-weight: bold; }
+        #status {
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>⚓ Fortuna Leaderboard</h1>
+    <p class="subtitle">Top 10 Sailors &mdash; refreshes every 5 seconds</p>
+    <table>
+        <thead>
+            <tr>
+                <th class="rank">#</th>
+                <th>Name</th>
+                <th class="score">Score</th>
+                <th>Sail</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            <tr><td colspan="4" style="color:#888;text-align:center">Loading&hellip;</td></tr>
+        </tbody>
+    </table>
+    <p id="status"></p>
+
+    <script>
+        const SAIL_COLORS = {
+            0: '⬜ White',
+            1: '🟥 Red',
+            2: '🟦 Blue',
+            3: '🟨 Yellow',
+            4: '🟩 Green',
+            5: '🟫 Brown',
+            6: '🟧 Orange',
+            7: '🟪 Purple'
+        };
+
+        function sailName(id) {
+            return SAIL_COLORS[id] || ('Sail ' + id);
+        }
+
+        async function refresh() {
+            try {
+                const res = await fetch('/api/v1/scores?limit=10');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                const tbody = document.getElementById('tbody');
+                if (!data.scores || data.scores.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="color:#888;text-align:center">No scores yet.</td></tr>';
+                } else {
+                    tbody.innerHTML = data.scores.map((s, i) =>
+                        `<tr>
+                            <td class="rank">${i + 1}</td>
+                            <td>${escHtml(s.name)}</td>
+                            <td class="score">${s.score}</td>
+                            <td>${sailName(s.sail_color)}</td>
+                        </tr>`
+                    ).join('');
+                }
+                document.getElementById('status').textContent =
+                    'Last updated: ' + new Date().toLocaleTimeString();
+            } catch (e) {
+                document.getElementById('status').textContent = 'Error: ' + e.message;
+            }
+        }
+
+        function escHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        refresh();
+        setInterval(refresh, 5000);
+    </script>
+</body>
+</html>
