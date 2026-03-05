@@ -11,10 +11,21 @@ using namespace drogon::orm;
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
+// Apply headers that prevent browsers from caching responses or silently
+// upgrading the connection to HTTPS (e.g. via HSTS inherited from a prior
+// visit to the same hostname over TLS).
+static void addNoCacheHeaders(const HttpResponsePtr &resp)
+{
+    resp->addHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    resp->addHeader("Pragma",        "no-cache");
+    resp->addHeader("X-Content-Type-Options", "nosniff");
+}
+
 static HttpResponsePtr jsonResp(int status, const Json::Value &body)
 {
     auto resp = HttpResponse::newHttpJsonResponse(body);
     resp->setStatusCode(static_cast<HttpStatusCode>(status));
+    addNoCacheHeaders(resp);
     return resp;
 }
 
@@ -162,6 +173,7 @@ void ScoresController::getIndex(
     auto resp = HttpResponse::newFileResponse("./public/index.html",
                                               "",
                                               CT_TEXT_HTML);
+    addNoCacheHeaders(resp);
     callback(resp);
 }
 
@@ -198,6 +210,7 @@ void ScoresController::getScoresTxt(
             auto resp = HttpResponse::newHttpResponse();
             resp->setContentTypeCodeAndCustomString(CT_TEXT_PLAIN, "text/plain; charset=utf-8");
             resp->setBody(oss.str());
+            addNoCacheHeaders(resp);
             callback(resp);
         },
         [callback](const DrogonDbException &e)
@@ -208,4 +221,16 @@ void ScoresController::getScoresTxt(
             resp->setBody("Database error\n");
             callback(resp);
         });
+}
+
+// ── GET /health ──────────────────────────────────────────────────────────────
+
+void ScoresController::getHealth(
+    const HttpRequestPtr &req,
+    std::function<void(const HttpResponsePtr &)> &&callback)
+{
+    Json::Value body;
+    body["ok"]     = true;
+    body["status"] = "healthy";
+    callback(jsonResp(200, body));
 }
