@@ -1,0 +1,24 @@
+[Unit]
+Description=Fortuna Leaderboard Server
+Documentation=https://github.com/no8f/fortuna-leaderboard-server
+After=network.target
+
+[Service]
+Type=simple
+# Create this user before enabling the service:
+#   sudo useradd --system --no-create-home --shell /usr/sbin/nologin fortuna
+User=fortuna
+Group=fortuna
+WorkingDirectory=/opt/fortuna-leaderboard-server
+ExecStart=/opt/fortuna-leaderboard-server/fortuna-leaderboard-server
+Restart=on-failure
+RestartSec=5s
+
+# Harden the service
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/fortuna-leaderboard-server
+
+[Install]
+WantedBy=multi-user.target
