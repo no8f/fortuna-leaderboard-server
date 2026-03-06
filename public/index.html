@@ -5,9 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fortuna Leaderboard</title>
     <style>
+        :root {
+            --clr-wood:    #5c3a1e;
+            --clr-ink:     #2a1505;
+            --clr-ink-mid: #5a3010;
+            --clr-score:   #2a4a10;
+            --clr-status:  #7a5030;
+            --clr-border:  #a07840;
+            --clr-accent:  #8b6532;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background: #5c3a1e;
+            background: var(--clr-wood);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -24,10 +33,10 @@
         }
         .content {
             position: absolute;
-            top: 17%;
-            left: 16%;
-            width: 68%;
-            height: 75%;
+            top: 14%;
+            left: 14%;
+            width: 72%;
+            height: 78%;
             overflow-y: auto;
         }
         table {
@@ -38,27 +47,27 @@
         th, td {
             padding: 0.35rem 0.5rem;
             text-align: left;
-            color: #2a1505;
+            color: var(--clr-ink);
             font-size: clamp(0.6rem, 1.5vw, 0.9rem);
         }
         th {
             font-size: clamp(0.55rem, 1.2vw, 0.78rem);
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            color: #5a3010;
-            border-bottom: 1px solid #a07840;
+            color: var(--clr-ink-mid);
+            border-bottom: 1px solid var(--clr-border);
         }
-        tr:nth-child(even) { background: rgba(139, 101, 50, 0.12); }
-        tr:hover { background: rgba(139, 101, 50, 0.22); }
-        .rank { color: #5a3010; font-weight: bold; width: 2rem; }
-        .score { color: #2a4a10; font-weight: bold; }
+        tr:nth-child(even) { background: color-mix(in srgb, var(--clr-accent) 12%, transparent); }
+        tr:hover           { background: color-mix(in srgb, var(--clr-accent) 22%, transparent); }
+        .rank  { color: var(--clr-ink-mid); font-weight: bold; width: 2rem; }
+        .score { color: var(--clr-score);   font-weight: bold; }
         #status {
             position: absolute;
-            bottom: 7%;
-            left: 16%;
-            width: 68%;
+            bottom: 5%;
+            left: 14%;
+            width: 72%;
             font-size: clamp(0.5rem, 1vw, 0.68rem);
-            color: #7a5030;
+            color: var(--clr-status);
             text-align: center;
         }
     </style>
@@ -76,7 +85,7 @@
                     </tr>
                 </thead>
                 <tbody id="tbody">
-                    <tr><td colspan="4" style="text-align:center;color:#7a5030">Loading&hellip;</td></tr>
+                    <tr><td colspan="4" style="text-align:center;color:var(--clr-status)">Loading&hellip;</td></tr>
                 </tbody>
             </table>
         </div>
@@ -106,7 +115,7 @@
                 const data = await res.json();
                 const tbody = document.getElementById('tbody');
                 if (!data.scores || data.scores.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="color:#7a5030;text-align:center">No scores yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--clr-status);text-align:center">No scores yet.</td></tr>';
                 } else {
                     tbody.innerHTML = data.scores.map((s, i) =>
                         `<tr>
