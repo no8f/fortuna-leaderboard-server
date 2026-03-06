@@ -79,20 +79,24 @@
     <p id="status"></p>
 
     <script>
-        const SAIL_COLORS = {
-            0: '⬜ White',
-            1: '🟥 Red',
-            2: '🟦 Blue',
-            3: '🟨 Yellow',
-            4: '🟩 Green',
-            5: '🟫 Brown',
-            6: '🟧 Orange',
-            7: '🟪 Purple'
-        };
+    function parseSailColor(value) {
+      // value can be: number 0..7 (legacy) OR "#RRGGBB" OR number 0..0xFFFFFF
+      if (typeof value === "string") {
+        const s = value.trim();
+        if (/^#[0-9a-fA-F]{6}$/.test(s)) return { label: s.toUpperCase(), hex: s };
+        // tolerate "RRGGBB"
+        if (/^[0-9a-fA-F]{6}$/.test(s)) return { label: ("#" + s).toUpperCase(), hex: ("#" + s) };
+      }
 
-        function sailName(id) {
-            return SAIL_COLORS[id] || ('Sail ' + id);
+      if (Number.isInteger(value)) {
+        if (value >= 0 && value <= 0xFFFFFF) {
+          const hex = "#" + value.toString(16).padStart(6, "0").toUpperCase();
+          return { label: hex, hex };
         }
+      }
+
+      return { label: "Unknown", hex: "#888888" };
+    }
 
         async function refresh() {
             try {
@@ -103,14 +107,15 @@
                 if (!data.scores || data.scores.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="4" style="color:#888;text-align:center">No scores yet.</td></tr>';
                 } else {
-                    tbody.innerHTML = data.scores.map((s, i) =>
-                        `<tr>
+                    tbody.innerHTML = data.scores.map((s, i) => {
+                    const c = parseSailColor(s.sail_color);
+                        return `<tr>
                             <td class="rank">${i + 1}</td>
                             <td>${escHtml(s.name)}</td>
                             <td class="score">${s.score}</td>
-                            <td>${sailName(s.sail_color)}</td>
+                            <td><span style="color:${c.hex}">⬤</span></td>
                         </tr>`
-                    ).join('');
+                    }).join('');
                 }
                 document.getElementById('status').textContent =
                     'Last updated: ' + new Date().toLocaleTimeString();
