@@ -5,78 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fortuna Leaderboard</title>
     <style>
+        :root {
+            --clr-wood:    #5c3a1e;
+            --clr-ink:     #2a1505;
+            --clr-ink-mid: #5a3010;
+            --clr-score:   #2a4a10;
+            --clr-status:  #7a5030;
+            --clr-border:  #a07840;
+            --clr-accent:  #8b6532;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background: #1a1a2e;
-            color: #eee;
-            font-family: 'Segoe UI', sans-serif;
+            background: var(--clr-wood);
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 2rem 1rem;
         }
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            color: #f0c040;
-            text-shadow: 0 0 12px #f0c040aa;
+        .board {
+            position: relative;
+            width: min(640px, 100vw);
+            aspect-ratio: 4 / 3;
+            background-image: url('https://github.com/user-attachments/assets/105556f5-9327-43b6-adf7-d2df8ddbb835'), url('scoreboard_bg.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
         }
-        .subtitle {
-            font-size: 0.9rem;
-            color: #aaa;
-            margin-bottom: 2rem;
+        .content {
+            position: absolute;
+            top: 14%;
+            left: 14%;
+            width: 72%;
+            height: 78%;
+            overflow-y: auto;
         }
         table {
             width: 100%;
-            max-width: 600px;
             border-collapse: collapse;
-            background: #16213e;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 24px #0008;
-        }
-        thead {
-            background: #0f3460;
+            background: transparent;
         }
         th, td {
-            padding: 0.75rem 1.25rem;
+            padding: 0.35rem 0.5rem;
             text-align: left;
+            color: var(--clr-ink);
+            font-size: clamp(0.6rem, 1.5vw, 0.9rem);
         }
         th {
-            font-size: 0.85rem;
+            font-size: clamp(0.55rem, 1.2vw, 0.78rem);
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #aac;
+            letter-spacing: 0.06em;
+            color: var(--clr-ink-mid);
+            border-bottom: 1px solid var(--clr-border);
         }
-        tr:nth-child(even) { background: #1a2a50; }
-        tr:hover { background: #1e3060; }
-        .rank { color: #f0c040; font-weight: bold; width: 2.5rem; }
-        .score { color: #7cf; font-weight: bold; }
+        tr:nth-child(even) { background: rgba(139, 101, 50, 0.12); background: color-mix(in srgb, var(--clr-accent) 12%, transparent); }
+        tr:hover           { background: rgba(139, 101, 50, 0.22); background: color-mix(in srgb, var(--clr-accent) 22%, transparent); }
+        .rank  { color: var(--clr-ink-mid); font-weight: bold; width: 2rem; }
+        .score { color: var(--clr-score);   font-weight: bold; }
         #status {
-            margin-top: 1.5rem;
-            font-size: 0.8rem;
-            color: #888;
+            position: absolute;
+            bottom: 5%;
+            left: 14%;
+            width: 72%;
+            font-size: clamp(0.5rem, 1vw, 0.68rem);
+            color: var(--clr-status);
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <h1>⚓ Fortuna Leaderboard</h1>
-    <p class="subtitle">Top 10 Sailors &mdash; refreshes every 5 seconds</p>
-    <table>
-        <thead>
-            <tr>
-                <th class="rank">#</th>
-                <th>Name</th>
-                <th class="score">Score</th>
-                <th>Sail</th>
-            </tr>
-        </thead>
-        <tbody id="tbody">
-            <tr><td colspan="4" style="color:#888;text-align:center">Loading&hellip;</td></tr>
-        </tbody>
-    </table>
-    <p id="status"></p>
+    <div class="board">
+        <div class="content">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="rank">#</th>
+                        <th>Name</th>
+                        <th class="score">Score</th>
+                        <th>Sail</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                    <tr><td colspan="4" style="text-align:center;color:var(--clr-status)">Loading&hellip;</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p id="status"></p>
+    </div>
 
     <script>
     function parseSailColor(value) {
@@ -105,7 +119,7 @@
                 const data = await res.json();
                 const tbody = document.getElementById('tbody');
                 if (!data.scores || data.scores.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="color:#888;text-align:center">No scores yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--clr-status);text-align:center">No scores yet.</td></tr>';
                 } else {
                     tbody.innerHTML = data.scores.map((s, i) => {
                     const c = parseSailColor(s.sail_color);
